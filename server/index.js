@@ -15,11 +15,15 @@ import userRoutes from "./routes/user.js";
 const app = express();
 
 const PORT = Number(process.env.PORT) || 3001;
-const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:3000";
+const CLIENT_URL = (process.env.CLIENT_URL || "http://localhost:3000").replace(/\/$/, "");
 
 app.use(cors({ origin: CLIENT_URL }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+app.get("/", (req, res) => {
+  res.json({ ok: true });
+});
 
 app.use("/api/auth", authRoutes);
 app.use(VerifyToken);
@@ -34,13 +38,14 @@ try {
   process.exit(1);
 }
 
-const server = app.listen(PORT, () => {
+const server = app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server listening on port ${PORT}`);
 });
 
 const io = new Server(server, {
   cors: {
     origin: CLIENT_URL,
+    methods: ["GET", "POST"],
     credentials: true,
   },
 });

@@ -35,6 +35,10 @@ export async function connectDB() {
     charset: "utf8mb4",
   };
 
+  if (process.env.DB_SSL === "true") {
+    baseConfig.ssl = { rejectUnauthorized: true };
+  }
+
   pool = mysql.createPool({ ...baseConfig, database });
 
   try {
@@ -48,7 +52,13 @@ export async function connectDB() {
       throw error;
     }
 
-    const connection = await mysql.createConnection({ host, port, user, password });
+    const connection = await mysql.createConnection({
+      host,
+      port,
+      user,
+      password,
+      ssl: baseConfig.ssl,
+    });
     await connection.query(
       `CREATE DATABASE IF NOT EXISTS \`${database}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`
     );
